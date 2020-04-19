@@ -7,10 +7,20 @@
     <script src="https://unpkg.com/material-components-web@v4.0.0/dist/material-components-web.min.js"></script>
 	  
 	<style>
+		.screen{
+			margin:5px;
+		}
+		
 		:root {
     		--mdc-theme-primary: #da70d6;
 		}
-		
+		h1{
+			color:#da70d6;
+			font-family:verdana;
+		}
+		h5{
+			font-family:verdana;
+		}
 		body{margin: 0}
 		main{margin-left: 8px}
 		
@@ -18,37 +28,18 @@
   </head>
 	
   <body>
-	  
-	<aside class="mdc-drawer mdc-drawer--modal">
-    <div class="mdc-drawer__content">
-      <nav class="mdc-list">
-        <a class="mdc-list-item mdc-list-item--activated" href="#" aria-current="page">
-          <i class="material-icons mdc-list-item__graphic" aria-hidden="true">inbox</i>
-          <span class="mdc-list-item__text">Inbox</span>
-        </a>
-        <a class="mdc-list-item" href="#">
-          <i class="material-icons mdc-list-item__graphic" aria-hidden="true">send</i>
-          <span class="mdc-list-item__text">Outgoing</span>
-        </a>
-        <a class="mdc-list-item" href="#">
-          <i class="material-icons mdc-list-item__graphic" aria-hidden="true">drafts</i>
-          <span class="mdc-list-item__text">Drafts</span>
-        </a>
-      </nav>
-    </div>
-  </aside>
 	  	  
 	<header class="mdc-top-app-bar">
 	  <div class="mdc-top-app-bar__row">
 		<section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
 <!-- 		  <button class="material-icons mdc-top-app-bar__navigation-icon mdc-icon-button">menu</button> -->
-		  <span class="mdc-top-app-bar__title">COVID-19 Data</span>
+		  <span class="mdc-top-app-bar__title" style="font-family:verdana;">COVID-19 Data</span>
 		</section>
 		<section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-end" role="toolbar">
 		  <button class="material-icons mdc-top-app-bar__action-item mdc-icon-button" screen="home" aria-label="home" onclick="showScreen('home');">home</button>
 		  <button class="material-icons mdc-top-app-bar__action-item mdc-icon-button" screen="search" aria-label="search" onclick="showScreen('search');">search</button>
 		  <button class="material-icons mdc-top-app-bar__action-item mdc-icon-button" screen="table" aria-label="table" onclick="showScreen('table');">table</button>
-		  <button class="material-icons mdc-top-app-bar__action-item mdc-icon-button" screen="chart" aria-label="chart" onclick="showScreen('chart');">table</button>
+		  <button class="material-icons mdc-top-app-bar__action-item mdc-icon-button" screen="chart" aria-label="chart" onclick="showScreen('chart');">timeline</button>
 		</section>
 	  </div>
 	</header>
@@ -57,11 +48,12 @@
 
 		  <div class ="screen" id="home" style="display: block;">
 			  <h1>Home</h1>
+			  <h5>Search countries to see Covid-19 confirmed cases</h5>
 		  </div>
 		  <div class="screen" id="search" style="display: none;">
 			  <h1>Search</h1>
-			  <br><br>
-			  <input id = "country" list = "countries">
+			  <h5>Find and add countries to list to be charted</h5>
+			  <input id = "country" list = "countries" style="margin: 10px;">
 			   <datalist id = "countries">
 			  </datalist>
 			  <br>
@@ -99,7 +91,7 @@
 		  </div> 
 		  <div class="screen" id="chart" style="display: none;">
 			  <h1>Chart</h1>
-			  <div id="createChart" style="width: 900px; height: 500px">
+			  <div id="createChart" style="width: 900px; height: 800px">
 				  
 			  </div>
 		  </div>
@@ -201,17 +193,14 @@
 		  }
 		  
 		  const createChart = () =>{
+			  let curr = new google.visualization.DataTable();
 			  let chartInfo = [];
 			  
-			  let heading = [];
-			  
-			  heading.push("Date");
-			  for(let i = 0; i < listOfCountries.length; i++){
-				  heading.push(listOfCountries[i]);
+			  curr.addColumn("string", "string");
+			   for(let i = 0; i < listOfCountries.length; i++){
+				 curr.addColumn("number", listOfCountries[i]);
 			  }
-			  
-			  chartInfo.push(heading);
-			  
+		  
 			  for(let j = 0; j < data[listOfCountries[0]].length; j++){
 				  let currRow = [];
 				  currRow.push(data[listOfCountries[0]][j]["date"]);
@@ -221,14 +210,18 @@
 				  chartInfo.push(currRow);
 			  }
 			  
-			  console.log(chartInfo.toString());
-			  
-			  let curr = google.visualization.arrayToDataTable(chartInfo);
+			  curr.addRows(chartInfo);
 			  
 			  let options = {
-				  title: 'Confirmed Cases Covid-19',
-				  curveType: 'function',
-				  legend: {position: 'bottom'}
+				  title: 'Confirmed Covid Cases',
+				  vAxis:{
+					  title:"Confirmed Cases"
+				  },
+				  hAxis:{
+					  slantedText:true,
+					  slantedTextAngle:60},
+					width: 900,
+					height: 500
 			  };
 			  
 			  let chart = new google.visualization.LineChart(document.getElementById("createChart"));
@@ -248,7 +241,9 @@
 		  document.querySelector("#addToList")
 			  .addEventListener("click", (e) => {
 			  let nameOfCountry = document.querySelector("#country").value;
-		  	  addToList(nameOfCountry);
+			  //makes sure not adding empty
+			  if(nameOfCountry)
+		  	  	addToList(nameOfCountry);
 		  });
 		  
 		  document.querySelector("#addToChart")
@@ -259,12 +254,7 @@
 			  createChart();
 		  });
 		  
-// 		  document.querySelector("mdc-top-app-bar__action-item")
-// 		  	.addEventListener("click", (e) => {
-// 			  createChart();
-// 			  showScreen("chart");
-// 		  });
-		  
+		  //fetches the data to use from github
 		  fetch(info)
 			  .then(response => response.json())
 			  .then(json => {
