@@ -45,7 +45,7 @@
 	</header>
 	  
 	  <main class = "mdc-top-app-bar--fixed-adjust">
-
+		  
 		  <div class ="screen" id="home" style="display: block;">
 			  <h1>Home</h1>
 			  <h5>Search countries to see Covid-19 confirmed cases</h5>
@@ -69,8 +69,7 @@
 				  <div class="mdc-button__ripple"></div>
 				  <span class="mdc-button__label">Chart Countries</span>
 			  </button>
-		  </div>
-		  
+		  </div>	  
 		  <div class="screen" id="table" style="display: none;">
 			  <h1>Table</h1>
 			  <br><br>
@@ -102,7 +101,9 @@
 	  <script>
 		  google.charts.load('current', {'packages':['corechart']});
 		  
+		  //used to keep track of the objects from the github
 		  let data;
+		  //keep track of countries added to the list
 		  const listOfCountries = [];
 		  const info = "https://pomber.github.io/covid19/timeseries.json";
 		  
@@ -119,7 +120,6 @@
 		  //add selected countries into the list
 		  const addToList = (country) =>{
 			  listOfCountries.push(country);
-			  console.log(listOfCountries.toString());
 			  let list = document.createElement("li");
 			  list.textContent = country;
 			  document.querySelector("#countriesList").appendChild(list);
@@ -130,16 +130,16 @@
 			  let th = document.querySelector(".mdc-data-table__header-row");
 			  let last = th.lastElementChild;
 			  
+			  //while there is an element in header row remove
 			  while(last){
 				  th.removeChild(last);
 				  last = th.lastElementChild;
 			  }
 			  
 			  
-			  
 			  let td = document.querySelector(".mdc-data-table__content");
 			  let lastTd = td.lastElementChild;
-			  
+			  //while there is an element in content remove
 			  while(lastTd){
 				  td.removeChild(lastTd);
 				  lastTd = td.lastElementChild;
@@ -171,7 +171,7 @@
 				  
 			  }
 			  
-			  //gets the dates
+			  //gets the dates and put dates to the table
 			  for(let j = 0; j < data[listOfCountries[0]].length; j++){
 				  rows = document.createElement("tr");
 			  	  rows.setAttribute("class", "mdc-data-table__row");
@@ -180,7 +180,7 @@
 				  document.querySelector(".mdc-data-table__content").appendChild(rows);
 			  }
 			  
-			  //confirmed cases
+			  //add confirmed cases to the table
 			  for(let p of listOfCountries){
 				  for(let m = 0; m < data[p].length; m++){
 					  let infoRows = document.createElement("td");
@@ -196,11 +196,13 @@
 			  let curr = new google.visualization.DataTable();
 			  let chartInfo = [];
 			  
+			  //add Columns- header, countries
 			  curr.addColumn("string", "string");
 			   for(let i = 0; i < listOfCountries.length; i++){
 				 curr.addColumn("number", listOfCountries[i]);
 			  }
 		  
+			  //loop to put date and cases into an array add to chartInfo
 			  for(let j = 0; j < data[listOfCountries[0]].length; j++){
 				  let currRow = [];
 				  currRow.push(data[listOfCountries[0]][j]["date"]);
@@ -229,15 +231,17 @@
 			  chart.draw(curr, options);
 		  }
 		  
-		  
+		  //event listeners
+		  //
+		  //
+		  //app bar seletion eventlistener
 		  document.querySelectorAll("mdc-top-app-bar__action-item")
 		  .forEach( element => {
 			  element.addEventListener("click", (e) => {
 				  showScreen(e.target.screen);
 			  })
-		  });
-		  
-		  
+		  }); 
+		  //add to list button
 		  document.querySelector("#addToList")
 			  .addEventListener("click", (e) => {
 			  let nameOfCountry = document.querySelector("#country").value;
@@ -245,7 +249,7 @@
 			  if(nameOfCountry)
 		  	  	addToList(nameOfCountry);
 		  });
-		  
+		  //create table and chart button
 		  document.querySelector("#addToChart")
 		  	.addEventListener("click", (e) => {
 			  clearTable();
@@ -254,6 +258,9 @@
 			  createChart();
 		  });
 		  
+		  
+		  //
+		  //
 		  //fetches the data to use from github
 		  fetch(info)
 			  .then(response => response.json())
